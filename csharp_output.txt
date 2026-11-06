@@ -1,0 +1,6 @@
+META_COMPLETED_HOURS:5.50
+META_TOTAL_HOURS:9.00
+META_PENDING_COUNT:2
+e (2.0h)
+Review open pull requests (2.0h)
+Draft Q4 product roadmap (1.5h)

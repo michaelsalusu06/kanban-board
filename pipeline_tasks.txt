@@ -1,0 +1,5 @@
+Draft Q4 product roadmap|1.50|Done
+Review open pull requests|2.00|Done
+e|2.00|Done
+Refine dashboard layout and spacing|2.50|On Progress
+Write release notes for v1.2|1.00|To-Do

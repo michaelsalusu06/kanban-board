@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kanban Board</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="workspace-shell">
+        <header class="topbar">
+            <div class="brand-block">
+                <h1>Kanban Board</h1>
+            </div>
+
+            <div class="metrics-strip">
+                <div class="metric-card">
+                    <span class="metric-label">Pending</span>
+                    <strong class="metric-value" id="metricPending">0</strong>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Completed</span>
+                    <strong class="metric-value" id="metricDone">0</strong>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Est. Workload</span>
+                    <strong class="metric-value" id="metricHours">0.0h</strong>
+                </div>
+            </div>
+        </header>
+
+        <section class="studio-grid">
+            <div class="panel pomodoro-panel">
+                <div class="panel-header">
+                    <div class="title-with-info">
+                        <h2>Pomodoro Timer</h2>
+                        <button type="button" class="info-icon-btn" onclick="openPomoModal()" title="About Pomodoro Timer" aria-label="Pomodoro Timer Information">i</button>
+                    </div>
+                    <span class="session-badge" id="sessionCounter">Round 1 of 4</span>
+                </div>
+
+                <div class="timer-readout-wrap">
+                    <div class="timer-mode-label" id="timerModeLabel">Focus</div>
+                    <div class="timer-display" id="timerDisplay">25:00</div>
+                    <div class="pomo-cycle-dots" id="pomoDots" title="4 Focus rounds (25m/5m) then 15m Long Break">
+                        <span class="pomo-dot active"></span>
+                        <span class="pomo-dot"></span>
+                        <span class="pomo-dot"></span>
+                        <span class="pomo-dot"></span>
+                    </div>
+                    <div class="timer-progress-track">
+                        <div class="timer-progress-bar" id="timerProgressBar"></div>
+                    </div>
+                </div>
+
+                <div class="timer-controls">
+                    <button type="button" class="btn-primary timer-btn" id="startTimerBtn" onclick="toggleTimer()">Start</button>
+                </div>
+            </div>
+
+            <div class="panel composer-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Add New Task</h2>
+                    </div>
+                    <div class="undo-toolbar">
+                        <button type="button" class="btn-outline" id="undoBtn" onclick="undoDelete()" disabled title="Restore the most recently removed task">
+                            <span>Undo Delete</span>
+                            <span class="undo-count" id="undoCountBadge">0</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <div class="field-wrap field-grow">
+                        <label for="taskInput">Task Description</label>
+                        <input type="text" id="taskInput" placeholder="e.g., Finalize quarterly roadmap">
+                    </div>
+
+                    <div class="field-wrap field-hours">
+                        <label for="hoursInput">Est. Hours</label>
+                        <input type="number" id="hoursInput" min="0.25" max="24" step="0.25" value="1.5">
+                    </div>
+
+                    <div class="field-wrap field-status">
+                        <label id="statusSelectLabel">Initial Stage</label>
+                        <select id="statusSelect" class="sr-only-select" aria-labelledby="statusSelectLabel">
+                            <option value="to-do">To-Do</option>
+                            <option value="on progress">In Progress</option>
+                            <option value="done">Done</option>
+                        </select>
+                        <div class="custom-select" id="customStatusSelect">
+                            <button type="button" class="custom-select-trigger" id="customSelectTrigger" onclick="toggleCustomDropdown(event)" aria-haspopup="listbox" aria-expanded="false">
+                                <span class="custom-select-value">
+                                    <span class="status-dot dot-todo" id="customSelectDot"></span>
+                                    <span id="customSelectText">To-Do</span>
+                                </span>
+                                <svg class="custom-select-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                            </button>
+                            <ul class="custom-select-menu" id="customSelectMenu" role="listbox">
+                                <li class="custom-select-option selected" data-value="to-do" data-dot="dot-todo" onclick="selectCustomOption('to-do', 'To-Do', 'dot-todo')">
+                                    <span class="status-dot dot-todo"></span>
+                                    <span>To-Do</span>
+                                </li>
+                                <li class="custom-select-option" data-value="on progress" data-dot="dot-progress" onclick="selectCustomOption('on progress', 'In Progress', 'dot-progress')">
+                                    <span class="status-dot dot-progress"></span>
+                                    <span>In Progress</span>
+                                </li>
+                                <li class="custom-select-option" data-value="done" data-dot="dot-done" onclick="selectCustomOption('done', 'Done', 'dot-done')">
+                                    <span class="status-dot dot-done"></span>
+                                    <span>Done</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="field-wrap field-submit">
+                        <button type="button" class="btn-primary" onclick="addTask()">Add Task</button>
+                    </div>
+                </div>
+
+                <div class="board-helper-bar">
+                    <p class="helper-hint">
+                        <strong>Tip:</strong> Use the <strong>&larr; / &rarr;</strong> arrows to move tasks between boxes, or click <strong>&times;</strong> to remove.
+                    </p>
+                    <div class="export-actions">
+                        <button type="button" class="btn-archive" onclick="exportBoard()">
+                            Generate Daily Report
+                        </button>
+                    </div>
+                </div>
+                <div id="statusMsg" class="status-banner" aria-live="polite"></div>
+            </div>
+        </section>
+
+        <main class="kanban-board">
+            <section class="column" id="col-todo" data-status="to-do">
+                <div class="column-header">
+                    <div class="column-title-group">
+                        <span class="status-dot dot-todo"></span>
+                        <h2>To-Do</h2>
+                    </div>
+                    <div class="column-meta">
+                        <span class="col-count" id="count-todo">0</span>
+                        <span class="col-hours" id="hours-todo">0.0h</span>
+                    </div>
+                </div>
+                <ul id="todoList" class="task-list"></ul>
+            </section>
+
+            <section class="column" id="col-progress" data-status="on progress">
+                <div class="column-header">
+                    <div class="column-title-group">
+                        <span class="status-dot dot-progress"></span>
+                        <h2>In Progress</h2>
+                    </div>
+                    <div class="column-meta">
+                        <span class="col-count" id="count-progress">0</span>
+                        <span class="col-hours" id="hours-progress">0.0h</span>
+                    </div>
+                </div>
+                <ul id="progressList" class="task-list"></ul>
+            </section>
+
+            <section class="column" id="col-done" data-status="done">
+                <div class="column-header">
+                    <div class="column-title-group">
+                        <span class="status-dot dot-done"></span>
+                        <h2>Done</h2>
+                    </div>
+                    <div class="column-meta">
+                        <span class="col-count" id="count-done">0</span>
+                        <span class="col-hours" id="hours-done">0.0h</span>
+                    </div>
+                </div>
+                <ul id="doneList" class="task-list"></ul>
+            </section>
+        </main>
+
+        <section class="panel report-panel" id="reportPanel">
+            <div class="panel-header">
+                <div>
+                    <h2>Daily Productivity Report</h2>
+                </div>
+                <div class="report-actions">
+                    <button type="button" class="btn-archive" onclick="downloadReportText()">Download</button>
+                </div>
+            </div>
+            <pre class="report-preview" id="reportPreview">Click "Generate Daily Report" above to compile and save today's productivity log.</pre>
+        </section>
+    </div>
+
+    <div class="modal-backdrop" id="pomoInfoModal" onclick="handleModalBackdropClick(event)" aria-hidden="true">
+        <div class="info-modal-card" role="dialog" aria-modal="true" aria-labelledby="pomoModalTitle">
+            <button type="button" class="modal-close-btn" onclick="closePomoModal()" aria-label="Close modal">&times;</button>
+            <h2 class="modal-title" id="pomoModalTitle">Pomodoro Timer</h2>
+
+            <div class="modal-grid">
+                <div class="modal-col">
+                    <div class="modal-subblock">
+                        <span class="modal-section-label">DESCRIPTION</span>
+                        <p class="modal-body-text">
+                            A structured focus timer built to sustain deep, distraction-free work sessions paired with scheduled recovery breaks.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="modal-col">
+                    <div class="modal-subblock">
+                        <span class="modal-section-label">DURATION &amp; CYCLE</span>
+                        <p class="modal-body-text">
+                            25 minutes of Focus followed by a 5-minute Short Break, repeated 4 times (4 rounds), ending with a 15-minute Long Break.
+                        </p>
+                    </div>
+
+                    <div class="modal-subblock">
+                        <span class="modal-section-label">SESSION RULE</span>
+                        <p class="modal-body-text">
+                            Unpausable &mdash; once started, the timer runs continuously through the entire cycle and cannot be paused.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
